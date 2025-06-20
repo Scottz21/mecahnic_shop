@@ -11,7 +11,7 @@ service_mechanics = db.Table(
     db.Column('mechanic_id', db.ForeignKey('mechanics.id'), primary_key=True)
 )
 
-class Customer(db.Model):  # ✅ using db.Model
+class Customer(db.Model):  # using db.Model
     __tablename__ = 'customers'
 
     id: Mapped[int] = mapped_column(primary_key=True)
