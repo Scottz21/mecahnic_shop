@@ -2,6 +2,8 @@ class DevelopmentConfig:
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:Chawgrizzly21!@localhost/library_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
+    CACHE_TYPE = 'simple'  # Use simple cache for development
+    CACHE_DEFAULT_TIMEOUT: 300
 
 class TestingConfig:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'

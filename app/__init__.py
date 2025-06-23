@@ -1,5 +1,5 @@
 from flask import Flask
-from .extensions import db, ma
+from .extensions import db, ma, limiter, cache
 from .blueprints.mechanics import mechanic_bp
 from .blueprints.service_tickets import service_ticket_bp
 from .blueprints.customers import customers_bp  # fixed relative import
@@ -10,6 +10,8 @@ def create_app(config_class='app.config.DevelopmentConfig'):
 
     db.init_app(app)
     ma.init_app(app)
+    limiter.init_app(app)
+    cache.init_app(app)
 
     # Register Blueprints *inside* the function
     app.register_blueprint(mechanic_bp, url_prefix='/mechanics')
