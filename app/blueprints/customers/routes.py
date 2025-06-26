@@ -39,7 +39,7 @@ def login():
 
 # CREATE CUSTOMERS
 @customers_bp.route('/', methods=['POST'])
-@limiter.limit("5 per day")
+@limiter.limit("15 per day")
 def create_customer():
     try:
         customer_data = customer_schema.load(request.json)
@@ -58,11 +58,21 @@ def create_customer():
 
 # GET ALL CUSTOMERS
 @customers_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)
 def get_customers():
-    query = select(Customer)
-    customers = db.session.execute(query).scalars().all()
-    return customers_schema.jsonify(customers), 200
+    try:
+        page = int(request.args.get('page'))
+        per_page = int(request.args.get('per_page'))
+        query = select(Customer)
+        pagination = db.paginate(query, page=page, per_page=per_page)
+        return jsonify(customers_schema.dump(pagination.items)), 200
+
+    except:
+        # Fallback: return all customers if pagination params are missing
+        query = select(Customer)
+        customers = db.session.execute(query).scalars().all()
+        return jsonify(customers_schema.dump(customers)), 200
+
+
 
 # GET CUSTOMER BY ID
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
@@ -108,6 +118,6 @@ def delete_customer(customer_id):
 @customers_bp.route('/my-tickets', methods=['GET'])
 @token_required
 def get_my_tickets(customer_id):
-    tickets = ServiceTicket.query.filter_by(customer_id=customer_id).all()
+    tickets = db.session.query(ServiceTicket).filter_by(customer_id=customer_id).all()
     return tickets_schema.jsonify(tickets), 200
 
