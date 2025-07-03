@@ -5,11 +5,16 @@ from . import service_tickets_bp
 from app.extensions import db
 from app.models import ServiceTicket, Mechanic, service_mechanics
 from .schemas import ticket_schema, tickets_schema
+from datetime import datetime 
 
 # CREATE Service Ticket
 @service_tickets_bp.route('/', methods=['POST'])
 def create_ticket():
     data = request.json
+    # 👇 Convert date string to date object
+    if "service_date" in data and isinstance(data["service_date"], str):
+        data["service_date"] = datetime.strptime(data["service_date"], "%Y-%m-%d").date()
+
     new_ticket = ServiceTicket(**data)
     db.session.add(new_ticket)
     db.session.commit()

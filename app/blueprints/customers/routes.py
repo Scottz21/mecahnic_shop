@@ -24,18 +24,17 @@ def login():
 
     if customer:
         token = encode_token(customer.id)
-
         if isinstance(token, bytes):
             token = token.decode('utf-8')
 
-        response = {
+        return jsonify({
             "status": "success",
             "message": "Login successful",
             "token": token
-        }
-        return jsonify(response), 200
+        }), 200
     else:
-        return jsonify({"error": "Invalid email or password!"}), 401
+        return jsonify({"message": "Invalid email or password!"}), 401  
+
 
 # CREATE CUSTOMERS
 @customers_bp.route('/', methods=['POST'])
@@ -104,15 +103,15 @@ def update_customer(customer_id):
 # DELETE CUSTOMER
 @customers_bp.route("/", methods=['DELETE'])  
 @token_required
-@limiter.limit("5 per day")
-def delete_customer(customer_id):
+def delete_customer(customer_id):  # ✅ relies on @token_required to pass customer_id
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({"error": "Customer not found."}), 400
 
     db.session.delete(customer)
     db.session.commit()
-    return jsonify({"message": "Customer deleted successfully."}), 200
+    return jsonify({"message": "Customer deleted successfully"}), 200
+
 
 # GET MY SERVICE TICKETS (requires token)
 @customers_bp.route('/my-tickets', methods=['GET'])

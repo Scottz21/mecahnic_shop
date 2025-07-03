@@ -1,0 +1,575 @@
+swagger: '2.0'
+info:
+  title: Mechanic Shop API
+  description: This is an API to manage a Mechanic Shop
+  version: 1.0.0
+host: 127.0.0.1:5000
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: 'JWT Bearer token. Format: ''Bearer {token}'''
+paths:
+  /customers/login:
+    post:
+      tags:
+      - Customers
+      summary: Login endpoint
+      description: Validates credentials and returns JWT token.
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/LoginCredentials'
+      responses:
+        200:
+          description: Login successful
+          schema:
+            $ref: '#/definitions/LoginResponse'
+  /customers:
+    post:
+      tags:
+      - Customers
+      summary: Create a new customer
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateCustomerPayload'
+      responses:
+        201:
+          description: Customer created
+          schema:
+            $ref: '#/definitions/CreateCustomerResponse'
+    get:
+      tags:
+      - Customers
+      summary: Get all customers (paginated optional)
+      parameters:
+      - name: page
+        in: query
+        type: integer
+      - name: per_page
+        in: query
+        type: integer
+      responses:
+        200:
+          description: List of customers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CreateCustomerResponse'
+      /customers:
+    delete:
+      tags:
+        - Customers
+      summary: Delete logged-in customer
+      description: Deletes the currently authenticated customer using a JWT token
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Customer deleted
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Customer deleted successfully
+        400:
+          description: Bad request or missing token
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Authorization header missing
+
+  /customers/{id}:
+    get:
+      tags:
+      - Customers
+      summary: Get customer by ID
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/CreateCustomerResponse'
+    put:
+      tags:
+      - Customers
+      summary: Update customer
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateCustomerPayload'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/UpdateCustomerResponse'
+    delete:
+      tags:
+      - Customers
+      summary: Delete customer by ID
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      responses:
+        200:
+          description: Deleted successfully
+  /customers/my-tickets:
+    get:
+      tags:
+      - Customers
+      summary: Get logged-in customer's tickets
+      security:
+      - BearerAuth: []
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ServiceTicket'
+  /mechanics:
+    post:
+      tags:
+      - Mechanics
+      summary: Create a new mechanic
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMechanicPayload'
+      responses:
+        201:
+          schema:
+            $ref: '#/definitions/CreateMechanicResponse'
+    get:
+      tags:
+      - Mechanics
+      summary: Get all mechanics (paginated optional)
+      parameters:
+      - name: page
+        in: query
+        type: integer
+      - name: per_page
+        in: query
+        type: integer
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CreateMechanicResponse'
+  /mechanics/{id}:
+    put:
+      tags:
+      - Mechanics
+      summary: Update mechanic
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMechanicPayload'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/CreateMechanicResponse'
+    delete:
+      tags:
+      - Mechanics
+      summary: Delete mechanic
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      responses:
+        204:
+          description: Deleted
+  /mechanics/most-active:
+    get:
+      tags:
+      - Mechanics
+      summary: Get most active mechanics
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CreateMechanicResponse'
+  /service-tickets:
+    post:
+      tags:
+      - Service Tickets
+      summary: Create service ticket
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateServiceTicketPayload'
+      responses:
+        201:
+          schema:
+            $ref: '#/definitions/ServiceTicket'
+    get:
+      tags:
+      - Service Tickets
+      summary: Get service tickets (paginated optional)
+      parameters:
+      - name: page
+        in: query
+        type: integer
+      - name: per_page
+        in: query
+        type: integer
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ServiceTicket'
+  /service-tickets/{ticket_id}/add-part/{part_id}:
+    post:
+      tags:
+      - Service Tickets
+      summary: Add part to ticket
+      parameters:
+      - name: ticket_id
+        in: path
+        required: true
+        type: integer
+      - name: part_id
+        in: path
+        required: true
+        type: integer
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/AddPartPayload'
+      responses:
+        200:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+  /inventory:
+    post:
+      tags:
+      - Inventory
+      summary: Create part
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePartPayload'
+      responses:
+        201:
+          description: Part created
+    get:
+      tags:
+      - Inventory
+      summary: Get all parts
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Part'
+  /inventory/{id}:
+    put:
+      tags:
+      - Inventory
+      summary: Update part
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePartPayload'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Part'
+    delete:
+      tags:
+      - Inventory
+      summary: Delete part
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      responses:
+        200:
+          description: Part deleted
+  /service-tickets/{ticket_id}/assign-mechanic/{mechanic_id}:
+    put:
+      tags:
+      - Mechanics
+      summary: Assign mechanic to ticket
+      description: Assigns a mechanic to a service ticket.
+      parameters:
+      - name: ticket_id
+        in: path
+        required: true
+        type: integer
+      - name: mechanic_id
+        in: path
+        required: true
+        type: integer
+      responses:
+        '200':
+          description: Mechanic assigned successfully
+          schema:
+            $ref: '#/definitions/ServiceTicket'
+        '404':
+          description: Mechanic or Ticket not found
+  /service-tickets/auth:
+    get:
+      tags:
+      - Service Tickets
+      summary: Get service tickets (Auth required)
+      description: Returns service tickets for the authenticated customer
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: List of service tickets for authenticated user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ServiceTicket'
+  /service-tickets/{ticket_id}/remove-mechanic/{mechanic_id}:
+    put:
+      tags:
+      - Service Tickets
+      summary: Remove a mechanic from a ticket
+      description: Removes the assigned mechanic from the service ticket
+      parameters:
+      - name: ticket_id
+        in: path
+        required: true
+        type: integer
+      - name: mechanic_id
+        in: path
+        required: true
+        type: integer
+      responses:
+        '200':
+          description: Mechanic removed from ticket
+          schema:
+            $ref: '#/definitions/ServiceTicket'
+  /service-tickets/{ticket_id}/edit:
+    put:
+      tags:
+      - Service Tickets
+      summary: Edit a service ticket's assigned mechanics
+      description: Add or remove multiple mechanics from a service ticket
+      parameters:
+      - name: ticket_id
+        in: path
+        required: true
+        type: integer
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/EditMechanicsPayload'
+      responses:
+        '200':
+          description: Ticket updated
+          schema:
+            $ref: '#/definitions/ServiceTicket'
+definitions:
+  LoginCredentials:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+  LoginResponse:
+    type: object
+    properties:
+      token:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+  CreateCustomerPayload:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      phone_number:
+        type: string
+      password:
+        type: string
+    required:
+    - name
+    - email
+    - phone_number
+    - password
+  CreateCustomerResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      phone_number:
+        type: string
+      password:
+        type: string
+  UpdateCustomerPayload:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - name
+    - email
+    - phone_number
+  UpdateCustomerResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      phone_number:
+        type: string
+  CreateMechanicPayload:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      salary:
+        type: number
+    required:
+    - name
+    - email
+    - phone
+    - salary
+  CreateMechanicResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      salary:
+        type: number
+  CreateServiceTicketPayload:
+    type: object
+    properties:
+      VIN:
+        type: string
+      service_date:
+        type: string
+        format: date
+      service_desc:
+        type: string
+      customer_id:
+        type: integer
+    required:
+    - VIN
+    - service_date
+    - service_desc
+    - customer_id
+  ServiceTicket:
+    type: object
+    properties:
+      id:
+        type: integer
+      VIN:
+        type: string
+      service_date:
+        type: string
+        format: date
+      service_desc:
+        type: string
+      customer_id:
+        type: integer
+  AddPartPayload:
+    type: object
+    properties:
+      quantity:
+        type: integer
+  CreatePartPayload:
+    type: object
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - name
+    - price
+  Part:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
