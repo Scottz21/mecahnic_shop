@@ -4,7 +4,7 @@ from functools import wraps
 from flask import request, jsonify
 import os
 
-SECRET_KEY = os.eviron.get('SECRET_KEY') or "super secret secrets"
+SECRET_KEY = os.environ.get('SECRET_KEY') or "super secret secrets"
 
 def encode_token(customer_id):
     payload = {
@@ -37,7 +37,7 @@ def token_required(f):
                 data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
                 print("DECODED JWT:", data)  # 👈 debug log
 
-                # ✅ Convert customer_id back to int after decoding
+                # Convert customer_id back to int after decoding
                 customer_id = int(data['sub'])
 
             except jwt.ExpiredSignatureError:
